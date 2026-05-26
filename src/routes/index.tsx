@@ -1,26 +1,58 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { OceanBackground } from "@/components/ocean/OceanBackground";
+import { CursorGlow } from "@/components/ocean/CursorGlow";
+import { ScrollProgress } from "@/components/ocean/ScrollProgress";
+import { Nav } from "@/components/ocean/Nav";
+import { Loader } from "@/components/ocean/Loader";
+import { WaveDivider } from "@/components/ocean/WaveDivider";
+import { Hero } from "@/components/ocean/sections/Hero";
+import { Identity } from "@/components/ocean/sections/Identity";
+import { Team } from "@/components/ocean/sections/Team";
+import { Skills } from "@/components/ocean/sections/Skills";
+import { Learn } from "@/components/ocean/sections/Learn";
+import { Workflow } from "@/components/ocean/sections/Workflow";
+import { OpenSource } from "@/components/ocean/sections/OpenSource";
+import { Fun } from "@/components/ocean/sections/Fun";
+import { Footer } from "@/components/ocean/sections/Footer";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "HighOnCode — A Submerged Research Collective" },
+      {
+        name: "description",
+        content:
+          "HighOnCode is a three-person developer team from BITS Pilani building intelligent systems beneath the surface of innovation.",
+      },
+      { property: "og:title", content: "HighOnCode — Submerged Research Collective" },
+      { property: "og:description", content: "Frontend, AI and security engineers shipping deep-water software." },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="relative min-h-screen">
+      <Loader />
+      <OceanBackground />
+      <CursorGlow />
+      <ScrollProgress />
+      <Nav />
+      <main className="relative">
+        <Hero />
+        <WaveDivider />
+        <Identity />
+        <Team />
+        <WaveDivider flip />
+        <Skills />
+        <Learn />
+        <WaveDivider />
+        <Workflow />
+        <OpenSource />
+        <Fun />
+        <Footer />
+      </main>
     </div>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }

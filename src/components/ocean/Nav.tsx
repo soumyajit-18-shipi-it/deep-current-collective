@@ -1,0 +1,67 @@
+import { useEffect, useState } from "react";
+import { Volume2, VolumeX, Waves } from "lucide-react";
+
+const links = [
+  { id: "identity", label: "Identity" },
+  { id: "team", label: "Crew" },
+  { id: "skills", label: "Skills" },
+  { id: "learn", label: "Learn" },
+  { id: "workflow", label: "Workflow" },
+  { id: "opensource", label: "Open Source" },
+  { id: "fun", label: "Fun Zone" },
+];
+
+export function Nav() {
+  const [sound, setSound] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed left-1/2 top-4 z-50 w-[min(96%,1100px)] -translate-x-1/2 rounded-2xl transition-all duration-500 ${
+        scrolled ? "glass-strong neon-border" : "glass"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <a href="#top" className="group flex items-center gap-2">
+          <span className="relative grid h-9 w-9 place-items-center rounded-xl border border-[#5EF2FF]/30 bg-[#041C24]">
+            <Waves className="h-5 w-5 text-[#5EF2FF]" strokeWidth={1.5} />
+            <span className="absolute inset-0 rounded-xl bg-[#00D9FF]/20 blur-md opacity-70 group-hover:opacity-100 transition" />
+          </span>
+          <span className="font-display text-sm font-bold tracking-[0.2em] text-glow-soft">
+            HIGH<span className="gradient-text">ON</span>CODE
+          </span>
+        </a>
+
+        <nav className="hidden items-center gap-1 lg:flex">
+          {links.map((l) => (
+            <a
+              key={l.id}
+              href={`#${l.id}`}
+              className="relative rounded-lg px-3 py-1.5 text-xs uppercase tracking-widest text-[#9EE9F2]/80 transition hover:text-[#7FFFD4]"
+            >
+              <span className="relative z-10">{l.label}</span>
+              <span className="absolute inset-0 rounded-lg opacity-0 transition hover:opacity-100" style={{ background: "linear-gradient(180deg, rgba(0,217,255,0.18), transparent)" }} />
+            </a>
+          ))}
+        </nav>
+
+        <button
+          onClick={() => setSound((s) => !s)}
+          className="group relative flex items-center gap-2 rounded-xl border border-[#5EF2FF]/20 bg-[#041C24]/50 px-3 py-1.5 text-xs uppercase tracking-widest text-[#9EE9F2] transition hover:border-[#00D9FF]/60 hover:text-[#7FFFD4]"
+          aria-label="Toggle ambient sound (visual only)"
+        >
+          {sound ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{sound ? "Ambient" : "Muted"}</span>
+          <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition group-hover:opacity-100" style={{ boxShadow: "0 0 24px rgba(0,217,255,0.5)" }} />
+        </button>
+      </div>
+    </header>
+  );
+}
