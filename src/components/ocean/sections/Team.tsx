@@ -402,10 +402,10 @@ export function Team() {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-3">
+        <div className="crew-grid grid gap-7 xl:grid-cols-3">
           {team.map((m, i) => (
             <Reveal key={m.name} delay={i * 0.08}>
-              <MemberCard m={m} />
+              <MemberCard m={m} index={i} />
             </Reveal>
           ))}
         </div>
@@ -414,7 +414,7 @@ export function Team() {
   );
 }
 
-function MemberCard({ m }: { m: Member }) {
+function MemberCard({ m, index }: { m: Member; index: number }) {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [openProject, setOpenProject] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -427,237 +427,396 @@ function MemberCard({ m }: { m: Member }) {
   };
   const onLeave = () => setPos({ x: 0, y: 0 });
 
+  // ID format DSR-001-AQ, etc.
+  const dossierId = `DSR-${String(index + 1).padStart(3, "0")}-${m.signalId}`;
+  const tickerItems = [
+    `SIG ${m.signalId}`,
+    `LAT 28.36N`,
+    `LON 75.58E`,
+    `DEPTH ${380 + index * 42}M`,
+    `PRESSURE STABLE`,
+    `CHANNEL OPEN`,
+  ];
+
   return (
     <motion.div
       ref={cardRef}
-      layout
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      whileHover={{ y: -10 }}
+      whileHover={{ y: -8 }}
       style={{
-        transform: `perspective(1400px) rotateY(${pos.x * 10}deg) rotateX(${-pos.y * 10}deg) translateY(0)`,
-        transition: "transform 200ms ease-out",
+        ["--card-accent" as string]: m.accent,
+        transform: `perspective(1500px) rotateY(${pos.x * 6}deg) rotateX(${-pos.y * 6}deg)`,
+        transformStyle: "preserve-3d",
+        transition: "transform 240ms cubic-bezier(.2,.8,.2,1)",
       }}
-      className="crew-card group relative h-full overflow-hidden rounded-[30px] border border-[#8bd8dc]/14 bg-[#04151C]/72 p-6 shadow-[0_0_0_1px_rgba(99,216,227,0.04),0_20px_80px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:p-7"
+      className="crew-card group relative h-full overflow-hidden rounded-[28px] border border-[#8bd8dc]/12 bg-gradient-to-br from-[#04151C]/82 via-[#031018]/85 to-[#01070b]/90 shadow-[0_30px_90px_-40px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-2xl"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,216,227,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(164,224,207,0.07),transparent_32%)] opacity-80" />
-      <div
-        className="pointer-events-none absolute inset-0 rounded-[30px] opacity-60 transition duration-500 group-hover:opacity-100"
-        style={{ background: "linear-gradient(145deg, rgba(99,216,227,0.06), transparent 28%, rgba(164,224,207,0.05) 70%, transparent)" }}
-      />
-      <div
-        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-55 transition duration-700 group-hover:opacity-90"
-        style={{ background: `radial-gradient(circle, ${m.accent}40, transparent 65%)`, filter: "blur(34px)" }}
-      />
-      <div className="pointer-events-none absolute inset-0 opacity-15" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+      {/* Animated conic edge */}
+      <span className="edge-ring" aria-hidden />
+
+      {/* Corner brackets */}
+      <span className="corner-bracket corner-tl" />
+      <span className="corner-bracket corner-tr" />
+      <span className="corner-bracket corner-bl" />
+      <span className="corner-bracket corner-br" />
+
+      {/* Scanning sweep */}
+      <span className="scan-line" aria-hidden />
+
+      {/* Atmospheric layers */}
+      <div className="pointer-events-none absolute inset-0 opacity-90">
+        <div
+          className="absolute -right-24 -top-28 h-72 w-72 rounded-full transition-opacity duration-700 group-hover:opacity-100"
+          style={{
+            background: `radial-gradient(circle, ${m.accent}38, transparent 65%)`,
+            filter: "blur(48px)",
+            opacity: 0.55,
+            transform: `translate3d(${pos.x * -22}px, ${pos.y * -18}px, 0)`,
+            transition: "transform 400ms ease-out",
+          }}
+        />
+        <div
+          className="absolute -bottom-32 -left-24 h-72 w-72 rounded-full opacity-40"
+          style={{
+            background: `radial-gradient(circle, rgba(52,75,115,0.55), transparent 65%)`,
+            filter: "blur(52px)",
+            transform: `translate3d(${pos.x * 18}px, ${pos.y * 14}px, 0)`,
+            transition: "transform 400ms ease-out",
+          }}
+        />
+      </div>
+
+      {/* Cursor reactive halo */}
       <div
         className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(420px circle at ${50 + pos.x * 100}% ${42 + pos.y * 100}%, ${m.accent}22, transparent 50%)`,
+          background: `radial-gradient(360px circle at ${50 + pos.x * 100}% ${42 + pos.y * 100}%, ${m.accent}1f, transparent 55%)`,
         }}
       />
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#8bd8dc]/70 to-transparent opacity-80"
-        animate={{ opacity: [0.45, 0.95, 0.45] }}
-        transition={{ duration: 3.6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-      />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#8bd8dc]/20 to-transparent" />
 
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -left-12 top-16 h-24 w-24 rounded-full border border-[#8bd8dc]/10"
-        animate={{ scale: [0.9, 1.05, 0.9], opacity: [0.12, 0.28, 0.12] }}
-        transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute bottom-12 right-10 h-8 w-8 rounded-full bg-[#a4e0cf]/10 blur-sm"
-        animate={{ y: [0, -8, 0], x: [0, 5, 0] }}
-        transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+      {/* Grid + noise */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(155,218,222,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(155,218,222,0.18) 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
+          maskImage: "radial-gradient(ellipse at 60% 30%, black 30%, transparent 80%)",
+        }}
       />
 
-      <div className="pointer-events-none absolute left-4 top-4 text-[96px] font-black leading-none tracking-tight text-white/5 select-none">
+      {/* Floating particles */}
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span
+          key={i}
+          className="card-particle"
+          style={{
+            left: `${15 + i * 17}%`,
+            bottom: `-10px`,
+            ["--dx" as string]: `${(i % 2 ? -1 : 1) * (10 + i * 6)}px`,
+            animationDuration: `${9 + i * 1.4}s`,
+            animationDelay: `${i * 1.1}s`,
+          }}
+        />
+      ))}
+
+      {/* Watermark initials */}
+      <div
+        className="pointer-events-none absolute -right-3 -bottom-6 select-none font-display text-[160px] font-black leading-none tracking-tighter text-white/[0.04]"
+        style={{ transform: `translate3d(${pos.x * 12}px, ${pos.y * 12}px, 0)`, transition: "transform 400ms ease-out" }}
+      >
         {m.initials}
       </div>
-      <div className="relative flex items-start gap-4">
-        <Avatar initials={m.initials} accent={m.accent} />
-        <div className="min-w-0 flex-1 pt-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#8bd8dc]/20 bg-[#041822]/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.26em] text-[#a9c8cc]">
-              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: m.accent, boxShadow: `0 0 10px ${m.accent}` }} />
-              Signal {m.signalId}
+
+      {/* ===== DOSSIER HEADER STRIP ===== */}
+      <div className="relative flex items-center justify-between gap-3 border-b border-[#8bd8dc]/10 bg-[#020a10]/60 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.28em] text-[#a9c8cc]/75">
+        <div className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: m.accent, boxShadow: `0 0 10px ${m.accent}` }} />
+          <span>{dossierId}</span>
+          <span className="text-[#5f7a80]">/</span>
+          <span className="text-[#c3dadd]/65">CLASSIFIED</span>
+        </div>
+        <div className="hidden items-center gap-2 sm:flex">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="relative inline-flex h-1.5 w-1.5">
+              <span className="absolute inset-0 rounded-full bg-[#a4e0cf]" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-[#a4e0cf]/60" />
             </span>
-            <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: m.accent }}>
-              {m.accentLabel}
-            </span>
-          </div>
-          <h3 className="mt-3 font-display text-3xl font-bold tracking-tight text-white drop-shadow-[0_0_10px_rgba(0,217,255,0.12)] sm:text-[2.1rem]">
-            {m.name}
-          </h3>
-          <p className="mt-1 text-xs uppercase tracking-[0.35em] text-[#9EE9F2]/75">{m.college}</p>
-          <p className="mt-3 max-w-md text-sm font-semibold uppercase tracking-[0.22em]" style={{ color: m.accent }}>
-            {m.role}
-          </p>
+            ONLINE
+          </span>
+          <span className="text-[#5f7a80]">·</span>
+          <span>CH {String(index + 1).padStart(2, "0")}</span>
         </div>
       </div>
 
-      <div className="relative mt-5 space-y-4">
-        <p className="max-w-prose text-sm leading-relaxed text-[#C7EEF4]/92 sm:text-[15px]">{m.about}</p>
+      {/* ===== TWO-COLUMN ASYMMETRIC BODY ===== */}
+      <div className="relative grid gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:grid-cols-[160px_1fr]">
+        {/* === HOLOGRAPHIC SIDEBAR === */}
+        <aside className="relative">
+          <div className="relative mx-auto h-[140px] w-[140px] lg:mx-0">
+            <span className="sonar-ring" />
+            <span className="sonar-ring" />
+            <span className="sonar-ring" />
+            <div
+              className="telemetry-ring absolute inset-[-14px] rounded-full border border-dashed"
+              style={{ borderColor: `${m.accent}44` }}
+            />
+            <div
+              className="telemetry-ring-rev absolute inset-[-26px] rounded-full border"
+              style={{ borderColor: `${m.accent}1f` }}
+            />
+            <Avatar initials={m.initials} accent={m.accent} />
+          </div>
 
-        <div className="flex items-center gap-3">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8bd8dc]/55 to-transparent" />
-          <span className="font-display text-[10px] uppercase tracking-[0.3em] text-[#8bd8dc]/60">Core Signal</span>
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8bd8dc]/55 to-transparent" />
-        </div>
-
-        <div className="grid gap-4">
-          <Group label="Skills">
-            <div className="flex flex-wrap gap-2">
-              {m.skills.map((s) => (
-                <Pill key={s} label={s} accent={m.accent} />
+          {/* mini telemetry block */}
+          <div className="mt-5 rounded-2xl border border-[#8bd8dc]/10 bg-[#020a10]/70 p-3">
+            <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.22em] text-[#7b969b]">
+              <span>SIGNAL</span>
+              <span style={{ color: m.accent }}>{m.signalId}</span>
+            </div>
+            <div className="mt-2 flex items-end gap-1 h-8">
+              {[3, 6, 4, 8, 5, 7, 4, 6, 9, 5, 7, 3, 6, 8].map((h, i) => (
+                <span
+                  key={i}
+                  className="flex-1 rounded-sm"
+                  style={{
+                    height: `${h * 10}%`,
+                    background: `linear-gradient(180deg, ${m.accent}, transparent)`,
+                    opacity: 0.55 + (i % 3) * 0.12,
+                  }}
+                />
               ))}
             </div>
-          </Group>
-
-          <Group label="Core Interests">
-            <div className="flex flex-wrap gap-2">
-              {m.interests.map((interest) => (
-                <Pill key={interest} label={interest} accent={m.accent} tone="subtle" />
-              ))}
+            <div className="mt-2 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.22em] text-[#7b969b]">
+              <span>AMP</span>
+              <span className="text-[#a9c8cc]">{72 + index * 5}%</span>
             </div>
-          </Group>
+          </div>
 
-          <Group label="Featured Projects">
-            <div className="space-y-2">
-              {m.projects.map((project, index) => {
-                const isOpen = openProject === index;
-                return (
-                  <motion.div
-                    key={project.title}
-                    layout
-                    className={`overflow-hidden rounded-2xl border transition duration-300 ${
-                      isOpen
-                        ? "border-[color:var(--a)]/55 bg-[#061A22]/85 shadow-[0_0_28px_rgba(99,216,227,0.12)]"
-                        : "border-[#8bd8dc]/10 bg-[#041C24]/35 hover:border-[color:var(--a)]/45 hover:bg-[#061A22]/70"
-                    }`}
-                    style={{ ["--a" as string]: m.accent }}
-                  >
-                    <motion.button
-                      type="button"
-                      onClick={() => setOpenProject(isOpen ? null : index)}
-                      whileTap={{ scale: 0.99 }}
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+          {/* role badge */}
+          <div className="mt-3 rounded-2xl border border-[#8bd8dc]/10 bg-[#020a10]/70 px-3 py-2.5">
+            <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-[#7b969b]">ROLE CLASS</div>
+            <div className="mt-1 font-display text-[11px] uppercase tracking-[0.22em]" style={{ color: m.accent }}>
+              {m.accentLabel}
+            </div>
+          </div>
+        </aside>
+
+        {/* === MAIN PANEL === */}
+        <div className="relative min-w-0">
+          {/* Name + role */}
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.28em] text-[#7b969b]">
+            <span>DOSSIER</span>
+            <span className="h-px w-6 bg-[#8bd8dc]/20" />
+            <span style={{ color: m.accent }}>{m.college}</span>
+          </div>
+          <h3 className="mt-2 font-display text-[1.85rem] leading-[1.05] tracking-tight text-white sm:text-[2rem]">
+            {m.name}
+          </h3>
+          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.26em]" style={{ color: m.accent }}>
+            {m.role}
+          </p>
+          {m.tagline && (
+            <p className="mt-2 text-[11px] uppercase tracking-[0.22em] text-[#9aaeb1]/80">{m.tagline}</p>
+          )}
+
+          {/* About */}
+          <p className="mt-4 text-[13.5px] leading-relaxed text-[#b8d4d9]/92">{m.about}</p>
+
+          {/* divider */}
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8bd8dc]/40 to-transparent" />
+            <span className="font-mono text-[9px] uppercase tracking-[0.32em] text-[#7b969b]">INTEL</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#8bd8dc]/40 to-transparent" />
+          </div>
+
+          <div className="grid gap-5">
+            <Group label="Skill Cluster">
+              <div className="flex flex-wrap gap-1.5">
+                {m.skills.map((s) => (
+                  <Pill key={s} label={s} accent={m.accent} />
+                ))}
+              </div>
+            </Group>
+
+            <Group label="Core Interests">
+              <div className="flex flex-wrap gap-1.5">
+                {m.interests.map((interest) => (
+                  <Pill key={interest} label={interest} accent={m.accent} tone="subtle" />
+                ))}
+              </div>
+            </Group>
+
+            <Group label="Classified Files">
+              <div className="space-y-2">
+                {m.projects.map((project, index) => {
+                  const isOpen = openProject === index;
+                  return (
+                    <motion.div
+                      key={project.title}
+                      layout
+                      data-open={isOpen}
+                      className="dossier-project overflow-hidden"
+                      style={{ ["--card-accent" as string]: m.accent }}
                     >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: m.accent, boxShadow: `0 0 10px ${m.accent}` }} />
-                          <span className="text-sm font-medium text-white">{project.title}</span>
+                      <motion.button
+                        type="button"
+                        onClick={() => setOpenProject(isOpen ? null : index)}
+                        whileTap={{ scale: 0.99 }}
+                        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2.5">
+                            <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-[#7b969b]">
+                              {project.id ?? `0${index + 1}`}
+                            </span>
+                            <span className="h-1 w-1 rounded-full" style={{ background: m.accent, boxShadow: `0 0 8px ${m.accent}` }} />
+                            <span className="truncate text-[13px] font-medium text-white">{project.title}</span>
+                          </div>
+                          <div className="mt-1.5 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.26em] text-[#7b969b]">
+                            <span style={{ color: m.accent }}>{project.status}</span>
+                            <span className="h-px w-5 bg-[#8bd8dc]/20" />
+                            <span>{project.progress}%</span>
+                            {project.highlight && (
+                              <>
+                                <span className="h-px w-5 bg-[#8bd8dc]/20" />
+                                <span className="truncate text-[#9aaeb1]/80 normal-case tracking-[0.04em]">{project.highlight}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] text-[#9EE9F2]/65">
-                          <span>{project.status}</span>
-                          <span className="h-px w-6 bg-[#8bd8dc]/20" />
-                          <span>{project.progress}% complete</span>
-                        </div>
-                      </div>
-                      <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.25 }} className="shrink-0 text-[#9EE9F2]">
-                        <ChevronDown className="h-4 w-4" />
-                      </motion.span>
-                    </motion.button>
-
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {isOpen && (
-                        <motion.div
-                          layout
-                          initial={{ height: 0, opacity: 0, y: -8 }}
-                          animate={{ height: "auto", opacity: 1, y: 0 }}
-                          exit={{ height: 0, opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                          className="overflow-hidden"
+                        <motion.span
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                          className="shrink-0 text-[#9EE9F2]"
                         >
-                          <div className="relative border-t border-[#8bd8dc]/10 px-4 py-4 text-sm leading-relaxed text-[#c3dadd]/90">
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,216,227,0.08),transparent_45%)]" />
-                            <div className="relative space-y-4">
-                              <p>{project.description}</p>
+                          <ChevronDown className="h-4 w-4" />
+                        </motion.span>
+                      </motion.button>
 
-                              <div className="flex flex-wrap gap-2">
-                                {project.stack.map((stackItem) => (
-                                  <span
-                                    key={stackItem}
-                                    className="rounded-full border border-[#8bd8dc]/12 bg-[#020B12]/70 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-[#c3dadd]"
-                                  >
-                                    {stackItem}
-                                  </span>
-                                ))}
-                              </div>
+                      <AnimatePresence initial={false} mode="popLayout">
+                        {isOpen && (
+                          <motion.div
+                            layout
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.36, ease: [0.2, 0.8, 0.2, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="relative border-t border-[#8bd8dc]/10 px-4 py-4">
+                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,216,227,0.08),transparent_45%)]" />
+                              <div className="relative space-y-4">
+                                <p className="text-[13px] leading-relaxed text-[#b8d4d9]/90">{project.description}</p>
 
-                              <div>
-                                <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.28em] text-[#9EE9F2]/65">
-                                  <span>Signal progress</span>
-                                  <span>{project.progress}%</span>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {project.stack.map((stackItem) => (
+                                    <span
+                                      key={stackItem}
+                                      className="rounded-md border border-[#8bd8dc]/12 bg-[#020B12]/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-[#c3dadd]"
+                                    >
+                                      {stackItem}
+                                    </span>
+                                  ))}
                                 </div>
-                                <div className="h-1.5 overflow-hidden rounded-full bg-[#041C24]">
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${project.progress}%` }}
-                                    transition={{ duration: 0.9, ease: "easeOut" }}
-                                    className="h-full rounded-full"
-                                    style={{ background: `linear-gradient(90deg, ${m.accent}, #a4e0cf)` }}
-                                  />
+
+                                <div>
+                                  <div className="mb-1 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.26em] text-[#7b969b]">
+                                    <span>TELEMETRY</span>
+                                    <span style={{ color: m.accent }}>{project.progress}%</span>
+                                  </div>
+                                  <div className="relative h-1.5 overflow-hidden rounded-full bg-[#020a10]">
+                                    <motion.div
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${project.progress}%` }}
+                                      transition={{ duration: 1.1, ease: [0.2, 0.8, 0.2, 1] }}
+                                      className="h-full rounded-full"
+                                      style={{
+                                        background: `linear-gradient(90deg, ${m.accent}, #a4e0cf)`,
+                                        boxShadow: `0 0 10px ${m.accent}`,
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </Group>
-
-          {m.achievements && m.achievements.length > 0 && (
-            <Group label={m.achievementsLabel ?? "Achievements"}>
-              <ul className="grid gap-2 text-[#C7EEF4]/90">
-                {m.achievements.map((a) => (
-                  <li key={a.title} className="flex items-start gap-2 rounded-xl border border-[#8bd8dc]/10 bg-[#041C24]/35 px-3 py-2">
-                    <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: m.accent }} />
-                    <div>
-                      <div className="text-sm leading-relaxed">{a.title}</div>
-                      {a.year && <div className="text-[10px] text-[#9EE9F2]/70">{a.year}</div>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </Group>
-          )}
 
-          {m.highlights.length > 0 && (
-            <Group label={m.highlightsLabel}>
-              <ul className="grid gap-2 text-[#C7EEF4]/90">
-                {m.highlights.map((item) => (
-                  <li key={item} className="flex items-start gap-2 rounded-xl border border-[#8bd8dc]/10 bg-[#041C24]/35 px-3 py-2">
-                    <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: m.accent }} />
-                    <span className="text-sm leading-relaxed">{item}</span>
-                  </li>
+            {m.achievements && m.achievements.length > 0 && (
+              <Group label={m.achievementsLabel ?? "Achievements"}>
+                <ul className="grid gap-1.5">
+                  {m.achievements.map((a) => (
+                    <li
+                      key={a.title}
+                      className="flex items-start gap-2 rounded-xl border border-[#8bd8dc]/10 bg-[#041C24]/40 px-3 py-2 transition hover:border-[color:var(--card-accent)]/40 hover:bg-[#061A22]/70"
+                    >
+                      <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: m.accent }} />
+                      <div className="min-w-0">
+                        <div className="text-[12.5px] leading-snug text-[#cde2e5]">{a.title}</div>
+                        {a.year && (
+                          <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.26em] text-[#7b969b]">{a.year}</div>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Group>
+            )}
+
+            {m.highlights.length > 0 && (
+              <Group label={m.highlightsLabel}>
+                <ul className="grid gap-1.5">
+                  {m.highlights.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-2 rounded-xl border border-[#8bd8dc]/10 bg-[#041C24]/40 px-3 py-2 transition hover:border-[color:var(--card-accent)]/40 hover:bg-[#061A22]/70"
+                    >
+                      <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: m.accent }} />
+                      <span className="text-[12.5px] leading-snug text-[#cde2e5]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Group>
+            )}
+
+            <Group label="Hobbies">
+              <div className="flex flex-wrap gap-1.5">
+                {m.hobbies.map((hobby) => (
+                  <Pill key={hobby} label={hobby} accent={m.accent} tone="subtle" />
                 ))}
-              </ul>
+              </div>
             </Group>
-          )}
-
-          <Group label="Hobbies">
-            <div className="flex flex-wrap gap-2">
-              {m.hobbies.map((hobby) => (
-                <Pill key={hobby} label={hobby} accent={m.accent} tone="subtle" />
-              ))}
-            </div>
-          </Group>
+          </div>
         </div>
       </div>
 
-      <div className="relative mt-6 flex items-center justify-between gap-4 border-t border-[#8bd8dc]/15 pt-4">
-        <span className="font-display text-[10px] uppercase tracking-[0.3em] text-[#8bd8dc]/70">Signal</span>
-        <div className="flex items-center gap-2">
+      {/* ===== TELEMETRY TICKER ===== */}
+      <div className="relative overflow-hidden border-t border-[#8bd8dc]/10 bg-[#020a10]/70 py-2">
+        <div className="ticker-track font-mono text-[9px] uppercase tracking-[0.32em] text-[#7b969b]">
+          {[...tickerItems, ...tickerItems].map((t, i) => (
+            <span key={i} className="inline-flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full" style={{ background: m.accent }} />
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== SOCIAL DECK ===== */}
+      <div className="relative flex items-center justify-between gap-4 border-t border-[#8bd8dc]/12 bg-gradient-to-b from-transparent to-[#02080d]/80 px-5 py-4 sm:px-6">
+        <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.3em] text-[#7b969b]">
+          <span>OPEN CHANNELS</span>
+          <span className="h-px w-8 bg-gradient-to-r from-[#8bd8dc]/50 to-transparent" />
+        </div>
+        <div className="flex items-center gap-2.5">
           {m.socials.map(({ icon: Icon, href, label, external }) => (
             <a
               key={label}
@@ -666,17 +825,14 @@ function MemberCard({ m }: { m: Member }) {
               title={label}
               target={external ? "_blank" : undefined}
               rel={external ? "noreferrer" : undefined}
-              className="group grid h-10 w-10 place-items-center rounded-full border border-[#8bd8dc]/25 bg-[#041C24]/70 text-[#c3dadd] transition duration-300 hover:scale-110 hover:border-[color:var(--a)] hover:text-white hover:shadow-[0_0_24px_var(--a)]"
-              style={{ ["--a" as string]: m.accent }}
+              className="social-bubble"
+              style={{ ["--card-accent" as string]: m.accent }}
             >
-              <Icon className="h-4 w-4 transition duration-300 group-hover:scale-110" />
+              <Icon className="relative z-10 h-4 w-4" />
             </a>
           ))}
         </div>
       </div>
-
-      <div className="pointer-events-none absolute left-6 top-20 h-px w-24 bg-gradient-to-r from-transparent via-[#8bd8dc]/35 to-transparent" />
-      <div className="pointer-events-none absolute right-8 top-28 h-px w-20 bg-gradient-to-r from-transparent via-[#a4e0cf]/24 to-transparent" />
     </motion.div>
   );
 }
