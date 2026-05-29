@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { getMotionProfile } from "@/lib/motion";
+import fishCursor from "@/fish.png";
 
 export function CursorGlow() {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -80,7 +81,7 @@ export function CursorGlow() {
         }}
       >
         <img
-          src="src/fish.png"
+          src={fishCursor}
           alt="cursor"
           draggable={false}
           className="
